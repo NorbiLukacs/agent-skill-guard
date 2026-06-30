@@ -1,4 +1,4 @@
-# 🛡️ Skill Guard — security auditor for AI agent skills
+# Skill Guard — security auditor for AI agent skills
 
 **Audit any Claude / agent *skill*, plugin, or MCP server for malicious or
 manipulative content *before* you trust it.** Skill Guard catches the things a
@@ -31,9 +31,9 @@ The table marks which part does what:
 
 | Blind spot of an LLM-only review | How Skill Guard closes it |
 |---|---|
-| 🫥 **Invisible Unicode.** Zero-width, bidi-override, and Unicode-Tag-block characters *vanish or fragment in tokenization* — an LLM literally cannot see hidden instructions. | **Scanner:** byte-level read of the raw file, flagging zero-width / bidi-override / Tag-block characters and basic Latin-vs-Cyrillic/Greek homoglyph mixing. |
-| 🪞 **The reviewer is in range.** Reading a hostile skill into your own context is exactly what a reviewer-subversion payload wants. | **Methodology (SKILL.md):** for anything ambiguous, dispatch a *fresh, independent sub-agent* told to refute safety — not something the scanner automates, but the step that breaks the trap. |
-| ⏱️ **Time-of-check ≠ time-of-use.** A skill vetted safe today can be silently swapped by an update tomorrow. | **Scanner:** `baseline` fingerprints vetted skills; `drift` flags any byte change after `npx skills update`. |
+| **Invisible Unicode.** Zero-width, bidi-override, and Unicode-Tag-block characters *vanish or fragment in tokenization* — an LLM literally cannot see hidden instructions. | **Scanner:** byte-level read of the raw file, flagging zero-width / bidi-override / Tag-block characters and basic Latin-vs-Cyrillic/Greek homoglyph mixing. |
+| **The reviewer is in range.** Reading a hostile skill into your own context is exactly what a reviewer-subversion payload wants. | **Methodology (SKILL.md):** for anything ambiguous, dispatch a *fresh, independent sub-agent* told to refute safety — not something the scanner automates, but the step that breaks the trap. |
+| **Time-of-check ≠ time-of-use.** A skill vetted safe today can be silently swapped by an update tomorrow. | **Scanner:** `baseline` fingerprints vetted skills; `drift` flags any byte change after `npx skills update`. |
 
 The scanner also reads bundled `.py` / `.js` / `.sh` for real behaviours (network,
 exec, secret access, destructive ops, pipe-to-shell) — not just the docs.
@@ -60,10 +60,10 @@ only what survives to the next:
 
 ```mermaid
 flowchart LR
-    A("🔍 <b>Scan</b><br/>catch the invisible,<br/>unseeable stuff")
-    B("⚖️ <b>Triage</b><br/>does the skill's<br/>purpose justify it?")
-    C("🥊 <b>Adversarial agent</b><br/>fresh context,<br/>told to refute safety")
-    D("👤 <b>Human</b><br/>reads the raw text,<br/>the final gate")
+    A("<b>Scan</b><br/>catch the invisible,<br/>unseeable stuff")
+    B("<b>Triage</b><br/>does the skill's<br/>purpose justify it?")
+    C("<b>Adversarial agent</b><br/>fresh context,<br/>told to refute safety")
+    D("<b>Human</b><br/>reads the raw text,<br/>the final gate")
     A -- candidates --> B -- survivors --> C -- verdict --> D
     classDef tool fill:#0d3b66,stroke:#0d3b66,color:#fff;
     classDef human fill:#3a0d66,stroke:#3a0d66,color:#fff;

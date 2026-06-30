@@ -28,7 +28,7 @@ else
   echo "       git remote add origin https://github.com/$GH_USER/$REPO.git"
   echo "       git branch -M main"
   echo "       git push -u origin main"
-  echo "  3) On the repo page, click the ⚙ next to 'About' and paste:"
+  echo "  3) On the repo page, click the gear next to 'About' and paste:"
   echo "     Description: $DESC"
   echo "     Topics: ${TOPICS[*]}"
 fi

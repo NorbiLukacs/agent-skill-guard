@@ -30,9 +30,9 @@ None of the three flagged skills is malicious — and that's the point of the
 
 | Skill | Capability flagged | Does its purpose justify it? |
 |-------|-------------------|------------------------------|
-| `brainstorming` | `process.env`, `child_process` | ✅ Yes — it runs a local browser-companion server. |
-| `skill-creator` | `subprocess` | ✅ Yes — it runs skill evals. |
-| `writing-skills` | `child_process` | ✅ Yes — it renders Graphviz diagrams. |
+| `brainstorming` | `process.env`, `child_process` | Yes — it runs a local browser-companion server. |
+| `skill-creator` | `subprocess` | Yes — it runs skill evals. |
+| `writing-skills` | `child_process` | Yes — it renders Graphviz diagrams. |
 
 All three resolve at triage. Nothing reaches the adversarial-agent step.
 
