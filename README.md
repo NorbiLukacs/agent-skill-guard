@@ -55,13 +55,20 @@ exec, secret access, destructive ops, pipe-to-shell) — not just the docs.
 A naive scanner cries wolf. In testing against 80+ real skills, the first pass
 produced **72 candidates — 0 actually malicious** (every one was a legit `curl`
 in docs, a justified `process.env`, or the phrase "use when asked"). So Skill
-Guard is a **funnel**, not a linter:
+Guard is a **funnel**, not a linter — each stage removes false alarms and hands
+only what survives to the next:
 
-```
-deterministic scan  →  purpose-aware triage  →  adversarial agent  →  human reads raw text
-   (catches the          (does the skill's        (defeats reviewer-    (the final gate;
-    invisible stuff)      purpose justify it?)     subversion)           static analysis
-                                                                         can't catch all)
+```mermaid
+flowchart LR
+    A("🔍 <b>Scan</b><br/>catch the invisible,<br/>unseeable stuff")
+    B("⚖️ <b>Triage</b><br/>does the skill's<br/>purpose justify it?")
+    C("🥊 <b>Adversarial agent</b><br/>fresh context,<br/>told to refute safety")
+    D("👤 <b>Human</b><br/>reads the raw text,<br/>the final gate")
+    A -- candidates --> B -- survivors --> C -- verdict --> D
+    classDef tool fill:#0d3b66,stroke:#0d3b66,color:#fff;
+    classDef human fill:#3a0d66,stroke:#3a0d66,color:#fff;
+    class A,C tool
+    class B,D human
 ```
 
 The bundled `SKILL.md` teaches your agent to run that whole funnel.
