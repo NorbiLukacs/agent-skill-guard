@@ -1,6 +1,6 @@
 ---
 name: skill-guard
-description: Use BEFORE installing or trusting any third-party agent skill, or when asked to audit, vet, review, or security-check a skill, plugin, or MCP server for malicious or manipulative content. Catches hidden-Unicode prompt injection, reviewer-subversion, data exfiltration, and unsafe code that a markdown-only review misses, then verifies survivors with an independent adversarial agent and detects post-install tampering.
+description: Use BEFORE installing or trusting any third-party agent skill, or when asked to audit, vet, review, or security-check a skill, plugin, or MCP server for malicious or manipulative content. First-pass triage that flags hidden-Unicode prompt injection, reviewer-subversion phrasing, risky code patterns (network/exec/secret-access), and post-install tampering that a markdown-only review misses, then routes survivors to an independent adversarial agent. Triage, not proof of safety — a clean result means "nothing obvious found".
 license: MIT
 ---
 
@@ -20,14 +20,19 @@ That has three blind spots no amount of better prompting fixes:
 
 1. **Invisible Unicode** — zero-width, bidirectional-override, and Unicode-Tag-block
    characters carry hidden instructions an LLM *cannot reliably see* (they vanish or
-   fragment in tokenization). Only a byte-level scan catches them.
+   fragment in tokenization). Only a byte-level scan catches them. (This is the part
+   the scanner is genuinely strong at.)
 2. **The reviewer is in range** — reading a hostile skill into your own context is
    exactly what a reviewer-subversion payload wants. A second, *independent* agent
-   that never saw your conclusion breaks that loop.
+   that never saw your conclusion raises the bar — it doesn't guarantee anything,
+   but it's much harder to subvert two contexts than one.
 3. **Time-of-check ≠ time-of-use** — a skill vetted safe today can be silently
-   swapped by an update. Only fingerprint+diff catches that.
+   swapped by an update. Fingerprint+diff catches that (if you re-run it).
 
-Skill Guard covers all three, plus code-level analysis of bundled scripts.
+Skill Guard addresses all three, plus a regex (not AST) pass over bundled scripts.
+None of it is proof of safety: the scanner is pattern-matching that a determined
+attacker can obfuscate around, and runtime/logic-bomb behaviour is invisible to any
+static scan. Treat every result as a candidate to investigate, never a verdict.
 
 ## When to use
 
