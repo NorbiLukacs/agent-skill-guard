@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# skill-guard runtime artifacts
+*.skill-guard-baseline.json
+skill-guard-baseline.json
+
+# Auto-generated local agent notes (never publish)
+CLAUDE.local.md
+**/CLAUDE.local.md
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
