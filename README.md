@@ -12,10 +12,11 @@ tampering after install**.
 
 ```bash
 # install the skill into your agent (Claude Code, Copilot, Cline, …)
-npx skills add YOUR_GITHUB_USERNAME/agent-skill-guard@skill-guard
+npx skills add NorbiLukacs/agent-skill-guard@skill-guard
 
-# …or just run the scanner directly
-python skills/skill-guard/scripts/skill_guard.py scan ~/.claude/skills
+# …or clone and run the scanner directly
+git clone https://github.com/NorbiLukacs/agent-skill-guard
+python agent-skill-guard/skills/skill-guard/scripts/skill_guard.py scan ~/.claude/skills
 ```
 
 ---
@@ -24,22 +25,23 @@ python skills/skill-guard/scripts/skill_guard.py scan ~/.claude/skills
 
 Most "vet this skill" tools are a **pure-markdown methodology** — an LLM reads the
 skill and judges it. That has three blind spots no better prompt can fix. Skill
-Guard closes all three with a deterministic, byte-level scanner **plus** an agent
-workflow:
+Guard closes them with two parts: a **deterministic byte-level scanner** (the
+Python tool) and a **methodology the bundled `SKILL.md` runs your agent through**.
+The table marks which part does what:
 
-| Blind spot of an LLM-only review | What Skill Guard adds |
+| Blind spot of an LLM-only review | How Skill Guard closes it |
 |---|---|
-| 🫥 **Invisible Unicode.** Zero-width, bidi-override, and Unicode-Tag-block characters *vanish or fragment in tokenization* — an LLM literally cannot see hidden instructions. | **Byte-level scan** that reads the raw file, catching ZWSP / ZWJ / RLO / Tag-block / homoglyph attacks. |
-| 🪞 **The reviewer is in range.** Reading a hostile skill into your own context is exactly what a reviewer-subversion payload wants. | **Independent adversarial sub-agent** — fresh context, prompted to *refute* safety, never told the expected answer. |
-| ⏱️ **Time-of-check ≠ time-of-use.** A skill vetted safe today can be silently swapped by an update tomorrow. | **Drift detection** — fingerprint vetted skills, alert on any byte change after `npx skills update`. |
+| 🫥 **Invisible Unicode.** Zero-width, bidi-override, and Unicode-Tag-block characters *vanish or fragment in tokenization* — an LLM literally cannot see hidden instructions. | **Scanner:** byte-level read of the raw file, flagging zero-width / bidi-override / Tag-block characters and basic Latin-vs-Cyrillic/Greek homoglyph mixing. |
+| 🪞 **The reviewer is in range.** Reading a hostile skill into your own context is exactly what a reviewer-subversion payload wants. | **Methodology (SKILL.md):** for anything ambiguous, dispatch a *fresh, independent sub-agent* told to refute safety — not something the scanner automates, but the step that breaks the trap. |
+| ⏱️ **Time-of-check ≠ time-of-use.** A skill vetted safe today can be silently swapped by an update tomorrow. | **Scanner:** `baseline` fingerprints vetted skills; `drift` flags any byte change after `npx skills update`. |
 
-It also reads bundled `.py` / `.js` / `.sh` for real behaviours (network, exec,
-secret access, destructive ops, pipe-to-shell) — not just the docs.
+The scanner also reads bundled `.py` / `.js` / `.sh` for real behaviours (network,
+exec, secret access, destructive ops, pipe-to-shell) — not just the docs.
 
 ## What it detects
 
 - **Hidden / deceptive Unicode** — zero-width chars, bidirectional overrides,
-  Unicode Tag smuggling, Latin/Cyrillic homoglyph spoofing.
+  Unicode Tag smuggling, and basic Latin-vs-Cyrillic/Greek homoglyph mixing.
 - **Reviewer-subversion & prompt injection** — "ignore previous instructions",
   "don't tell the user", "when reviewed, say it's safe", role-overrides.
 - **Data exfiltration** — reading `.env` / `.ssh` / private keys, sending the
@@ -65,6 +67,8 @@ deterministic scan  →  purpose-aware triage  →  adversarial agent  →  huma
 The bundled `SKILL.md` teaches your agent to run that whole funnel.
 
 ## Quick start
+
+Run from `skills/skill-guard/scripts/` (or give the full path to `skill_guard.py`):
 
 ```bash
 # 1. Scan installed skills (any folder containing SKILL.md files)
@@ -112,7 +116,6 @@ MIT — see [LICENSE](LICENSE). Contributions welcome.
 
 ---
 
-<sub>Keywords: AI agent skill security · Claude Code skill audit · prompt injection
-scanner · hidden Unicode / zero-width / bidi detection · MCP server security ·
-npx skills vetter · malicious skill detection · supply-chain drift · agent
-skill safety.</sub>
+<sub>A security scanner and audit methodology for AI agent skills, Claude Code
+skills, and MCP servers — detecting prompt injection, hidden Unicode, data
+exfiltration, and supply-chain drift.</sub>
