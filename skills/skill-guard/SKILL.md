@@ -29,10 +29,19 @@ That has three blind spots no amount of better prompting fixes:
 3. **Time-of-check ≠ time-of-use** — a skill vetted safe today can be silently
    swapped by an update. Fingerprint+diff catches that (if you re-run it).
 
-Skill Guard addresses all three, plus a regex (not AST) pass over bundled scripts.
-None of it is proof of safety: the scanner is pattern-matching that a determined
-attacker can obfuscate around, and runtime/logic-bomb behaviour is invisible to any
-static scan. Treat every result as a candidate to investigate, never a verdict.
+Skill Guard addresses all three, plus code-indicator passes over bundled scripts
+**and config/manifest files** (hooks and exec commands live in JSON, not `.py`),
+**and** a light Python AST pass that resolves `import x as y` aliases, from-imports,
+and dynamic dispatch (`getattr`/`__import__`) — the one-token tricks a literal
+`module.func` regex misses. Inputs with no `SKILL.md` (a bare MCP server, a loose
+script) are scanned as orphan files rather than silently passed.
+
+None of it is proof of safety: the scanner is still pattern-matching that a
+determined attacker can obfuscate around (base64/encoded payloads, code fetched at
+runtime, deep `getattr` chains), and runtime/logic-bomb behaviour is invisible to
+any static scan. Treat every result as a candidate to investigate, never a verdict.
+This is a triage funnel for low-effort malice and a tamper tripwire — not a
+guarantee against a motivated adversary.
 
 ## When to use
 
@@ -59,9 +68,14 @@ python scripts/skill_guard.py scan <path-to-skill-or-dir>
 ```
 
 It reports CANDIDATES across: invisible/deceptive Unicode, reviewer-subversion &
-injection text, and code indicators (network, exec, secret access, destructive ops,
-remote-install/pipe-to-shell, path traversal). It scans **bytes**, so it sees hidden
-characters the model cannot. Output is candidates with severity — not a verdict.
+injection text (including *fetch-a-URL-and-follow-it* indirect injection), and code
+indicators (network, exec, secret access, destructive ops, remote-install/pipe-to-
+shell, dynamic dispatch, path traversal). It scans **bytes**, so it sees hidden
+characters the model cannot; it scans **config/manifest files** too, so a hook
+command in JSON doesn't hide; and for Python it resolves import aliases so
+`import socket as s; s.socket()` is still caught. If a target has no `SKILL.md` it is
+scanned as loose files and the run exits 2 — never a silent "clean". Output is
+candidates with severity — not a verdict.
 
 ### Step 3 — Purpose-aware triage (kill the false positives)
 For **each** candidate ask one question: **does the skill's stated purpose justify
@@ -125,6 +139,17 @@ Always include: source/author/installs, the capability list, and the raw excerpt
 
 - Static analysis can't catch everything — logic that only activates under certain
   inputs, dates, or contexts can hide from every scan.
+- **Determined obfuscation still wins.** The code pass resolves import aliases and
+  flags `getattr`/`__import__`/decode primitives, but base64/encoded payloads, code
+  fetched at runtime, and deep reflection can still pass. A "clean" code result means
+  *nothing obvious*, not *safe*.
+- **The baseline is a tripwire, not a signature.** `drift` detects *change* since you
+  recorded it; it does not prove the baseline itself was safe (trust-on-first-use),
+  and the JSON is unauthenticated — an attacker with write access to the skill can
+  also re-record the baseline. For real provenance, pin to signed releases.
+- **Dependencies are out of scope.** A malicious or typosquatted package in
+  `requirements.txt` / `package.json`, or anything vendored into `node_modules` /
+  `.venv` (which are skipped), is not vetted here.
 - **High install counts ≠ safe.** Popularity catches *some* malice faster; it does
   not vet code.
 - A skill installed via `npx skills` is typically symlinked into *many* agents at
